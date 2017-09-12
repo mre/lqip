@@ -7,8 +7,13 @@ extern crate tera;
 #[macro_use]
 extern crate lazy_static;
 
+#[macro_use]
+extern crate duct;
+
+extern crate tempdir;
 extern crate select;
 
+use duct::cmd;
 use tera::{Context, Tera};
 use select::document::Document;
 use select::predicate::Name;
@@ -38,21 +43,53 @@ fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
     // oxipng clothes-min20.png --out clothes-oxi.png -o 4 --zopfli --strip all
     // data-encoding --mode=encode --base 64 --input clothes-oxi.png
 
+    let image_path = image.attr("data").ok_or(
+        "data attribute not found for image",
+    )?;
 
+    cmd!(
+        "svgexport",
+        image_path,
+        "thumb.png",
+        "\"svg{background:white;}\"",
+        "30:",
+        "0%"
+    ).read()?;
+
+    cmd!(
+        "oxipng",
+        "thumb.png",
+        "--out",
+        "thumb.png",
+        "-o",
+        "4",
+        "--zopfli",
+        "--strip",
+        "all"
+    ).read()?;
+
+    let base64 = cmd!(
+        "data-encoding",
+        "--mode=encode",
+        "--base",
+        "64",
+        "--input",
+        "thumb.png"
+    ).read()?;
 
     let mut context = Context::new();
     context.add("object_html", &image.html());
-    context.add("thumbnail_base64", &"0xDEADBEEF".to_string());
+    context.add("thumbnail_base64", &base64);
     Ok(TERA.render("image.html", &context)?)
 }
 
 fn run() -> Result<()> {
-    let path = "2017-makefiles.1.md";
+    let path = "2017-makefiles.md";
     let mut input = File::open(path)?;
 
     let mut dom = String::new();
     input.read_to_string(&mut dom)?;
-    println!("{:?}", dom);
+    //println!("{:?}", dom);
 
     let document: Document = (*dom).into();
 
@@ -64,7 +101,7 @@ fn run() -> Result<()> {
         dom = dom.replace(&image.html(), &thumbnail);
     }
 
-    println!("{}", dom);
+    //println!("{}", dom);
 
 
 

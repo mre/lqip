@@ -4,7 +4,9 @@ name = "lqip"
 version = "0.1.0"
 
 [dependencies]
+duct = "0.9.1"
 error-chain = "0.11.0"
 lazy_static = "0.2.8"
 select = "0.4.2"
+tempdir = "0.3.5"
 tera = "0.10.10"
