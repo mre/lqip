@@ -89,8 +89,6 @@ fn run() -> Result<()> {
 
 
     let matches = App::new("lqip")
-        .version("1.0")
-        .author("Matthias Endler")
         .about("Does awesome things")
         .arg(
             Arg::with_name("input")
