@@ -16,6 +16,7 @@ use clap::{Arg, App};
 extern crate tempdir;
 extern crate select;
 
+use tempdir::TempDir;
 use tera::{Context, Tera};
 use select::document::Document;
 use select::predicate::Name;
@@ -41,18 +42,17 @@ lazy_static! {
 
 // Generate a base64 thumbnail from the given image
 fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
-    // svgexport clothes.svg clothes-min20.png "svg{background:white;}" 30: 90% && wc -c < clothes-min20.png
-    // oxipng clothes-min20.png --out clothes-oxi.png -o 4 --zopfli --strip all
-    // data-encoding --mode=encode --base 64 --input clothes-oxi.png
-
     let image_path = image.attr("data").ok_or(
         "data attribute not found for image",
     )?;
 
+    let dir = TempDir::new("tmp")?;
+    let thumb = dir.path().join("thumb.png");
+
     cmd!(
         "svgexport",
         image_path,
-        "thumb.png",
+        &thumb,
         "\"svg{background:white;}\"",
         "30:",
         "0%"
@@ -60,9 +60,9 @@ fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
 
     cmd!(
         "oxipng",
-        "thumb.png",
+        &thumb,
         "--out",
-        "thumb.png",
+        &thumb,
         "-o",
         "4",
         "--zopfli",
@@ -76,7 +76,7 @@ fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
         "--base",
         "64",
         "--input",
-        "thumb.png"
+        &thumb
     ).read()?;
 
     let mut context = Context::new();
