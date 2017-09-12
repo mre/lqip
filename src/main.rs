@@ -10,10 +10,12 @@ extern crate lazy_static;
 #[macro_use]
 extern crate duct;
 
+extern crate clap;
+use clap::{Arg, App};
+
 extern crate tempdir;
 extern crate select;
 
-use duct::cmd;
 use tera::{Context, Tera};
 use select::document::Document;
 use select::predicate::Name;
@@ -84,7 +86,23 @@ fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
 }
 
 fn run() -> Result<()> {
-    let path = "2017-makefiles.md";
+
+
+    let matches = App::new("lqip")
+        .version("1.0")
+        .author("Matthias Endler")
+        .about("Does awesome things")
+        .arg(
+            Arg::with_name("input")
+                .short("i")
+                .long("input")
+                .value_name("FILE")
+                .help("Sets the input file")
+                .takes_value(true),
+        )
+        .get_matches();
+
+    let path = matches.value_of("input").ok_or("No input file given")?;
     let mut input = File::open(path)?;
 
     let mut dom = String::new();

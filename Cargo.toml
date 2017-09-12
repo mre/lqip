@@ -4,6 +4,7 @@ name = "lqip"
 version = "0.1.0"
 
 [dependencies]
+clap = "2.26.0"
 duct = "0.9.1"
 error-chain = "0.11.0"
 lazy_static = "0.2.8"
