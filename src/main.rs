@@ -22,7 +22,7 @@ use select::document::Document;
 use select::predicate::Name;
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::str;
 
 error_chain! {
@@ -86,8 +86,6 @@ fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
 }
 
 fn run() -> Result<()> {
-
-
     let matches = App::new("lqip")
         .about("Does awesome things")
         .arg(
@@ -101,11 +99,10 @@ fn run() -> Result<()> {
         .get_matches();
 
     let path = matches.value_of("input").ok_or("No input file given")?;
-    let mut input = File::open(path)?;
 
+    let mut file = File::open(path)?;
     let mut dom = String::new();
-    input.read_to_string(&mut dom)?;
-    //println!("{:?}", dom);
+    file.read_to_string(&mut dom)?;
 
     let document: Document = (*dom).into();
 
@@ -113,28 +110,13 @@ fn run() -> Result<()> {
 
     for image in images {
         let thumbnail = generate_thumbnail(&image)?;
-        println!("{}", thumbnail);
         dom = dom.replace(&image.html(), &thumbnail);
     }
 
-    //println!("{}", dom);
-
-
-
-    Ok(())
-
-    /*
-    let buffered = BufReader::new(&f);
-
-    for line in buffered.lines() {
-        println!("{}", line?);
-    }
-
-    write!(f, "Rust\n💖\nFun")?;
-
+    let mut output = File::create(path)?;
+    output.write_all(dom.as_bytes())?;
 
     Ok(())
-    */
 }
 
 quick_main!(run);
