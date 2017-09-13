@@ -2,15 +2,14 @@
 extern crate error_chain;
 
 #[macro_use]
-extern crate tera;
-
-#[macro_use]
 extern crate lazy_static;
 
 #[macro_use]
 extern crate duct;
 
 extern crate clap;
+extern crate tera;
+
 use clap::{Arg, App};
 
 extern crate tempdir;
@@ -34,7 +33,12 @@ error_chain! {
 
 lazy_static! {
     pub static ref TERA: Tera = {
-        let mut tera = compile_templates!("templates/**/*");
+        let mut tera = Tera::default();
+        tera.add_raw_template("image.html", r##"
+        <div class="loader">
+            {{ object_html }}
+            <img class="frozen" src="data:image/png;base64,{{ thumbnail_base64 }}" />
+        </div>"##).unwrap();
         tera.autoescape_on(vec![]);
         tera
     };
@@ -42,9 +46,14 @@ lazy_static! {
 
 // Generate a base64 thumbnail from the given image
 fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
-    let image_path = image.attr("data").ok_or(
+    let mut image_path = image.attr("data").ok_or(
         "data attribute not found for image",
     )?;
+
+    // Awkward way to create a relative path
+    if image_path.starts_with('/') {
+        image_path = &image_path[1..];
+    }
 
     let dir = TempDir::new("tmp")?;
     let thumb = dir.path().join("thumb.png");
