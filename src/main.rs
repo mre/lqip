@@ -34,10 +34,10 @@ error_chain! {
 lazy_static! {
     pub static ref TERA: Tera = {
         let mut tera = Tera::default();
-        tera.add_raw_template("image.html", r##"<div class="loader">
+        tera.add_raw_template("image.html", r#"<div class="loader">
             {{ object_html }}
             <img class="frozen" src="data:image/png;base64,{{ thumbnail_base64 }}" />
-        </div>"##).unwrap();
+        </div>"#).unwrap();
         tera.autoescape_on(vec![]);
         tera
     };
@@ -65,7 +65,7 @@ fn generate_thumbnail(
         "svgexport",
         image_path,
         &thumb,
-        "\"svg{background:white;}\"",
+        r#"svg{background:white;}"#,
         dimensions,
         quality
     ).read()?;
@@ -126,7 +126,7 @@ fn run() -> Result<()> {
 
     let path = matches.value_of("input").ok_or("No input file given")?;
     let dimensions = matches.value_of("dimensions").unwrap_or("30:");
-    let quality = matches.value_of("quality").unwrap_or("0%");
+    let quality = matches.value_of("quality").unwrap_or("1%");
 
     let mut file = File::open(path)?;
     let mut dom = String::new();
