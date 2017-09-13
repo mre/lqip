@@ -34,8 +34,7 @@ error_chain! {
 lazy_static! {
     pub static ref TERA: Tera = {
         let mut tera = Tera::default();
-        tera.add_raw_template("image.html", r##"
-        <div class="loader">
+        tera.add_raw_template("image.html", r##"<div class="loader">
             {{ object_html }}
             <img class="frozen" src="data:image/png;base64,{{ thumbnail_base64 }}" />
         </div>"##).unwrap();
@@ -45,7 +44,11 @@ lazy_static! {
 }
 
 // Generate a base64 thumbnail from the given image
-fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
+fn generate_thumbnail(
+    image: &select::node::Node,
+    dimensions: &str,
+    quality: &str,
+) -> Result<String> {
     let mut image_path = image.attr("data").ok_or(
         "data attribute not found for image",
     )?;
@@ -63,8 +66,8 @@ fn generate_thumbnail(image: &select::node::Node) -> Result<String> {
         image_path,
         &thumb,
         "\"svg{background:white;}\"",
-        "30:",
-        "0%"
+        dimensions,
+        quality
     ).read()?;
 
     cmd!(
@@ -102,12 +105,28 @@ fn run() -> Result<()> {
                 .short("i")
                 .long("input")
                 .value_name("FILE")
-                .help("Sets the input file")
+                .help("Input filename")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("dimensions")
+                .short("d")
+                .long("dimensions")
+                .help("Thumbnail dimensions (e.g. 30:")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("quality")
+                .short("q")
+                .long("quality")
+                .help("Thumbnail quality (e.g. 10%")
                 .takes_value(true),
         )
         .get_matches();
 
     let path = matches.value_of("input").ok_or("No input file given")?;
+    let dimensions = matches.value_of("dimensions").unwrap_or("30:");
+    let quality = matches.value_of("quality").unwrap_or("0%");
 
     let mut file = File::open(path)?;
     let mut dom = String::new();
@@ -118,7 +137,7 @@ fn run() -> Result<()> {
     let images = document.find(Name("object"));
 
     for image in images {
-        let thumbnail = generate_thumbnail(&image)?;
+        let thumbnail = generate_thumbnail(&image, dimensions, quality)?;
         dom = dom.replace(&image.html(), &thumbnail);
     }
 
