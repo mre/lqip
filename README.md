@@ -5,3 +5,14 @@ See https://www.guypo.com/introducing-lqip-low-quality-image-placeholders/.
 
 Most likely you won't find anything interesting here.  
 I just use this repo as a decentral backup. ;-)
+
+## Dependencies
+
+npm install svgexport -g
+cargo install oxipng
+cargo install data-encoding-bin
+
+## Usage notes
+
+cargo install
+lqip --help
