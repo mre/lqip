@@ -14,7 +14,7 @@ cargo install oxipng
 cargo install data-encoding-bin
 ```
 
-## Usage notes
+## Installation
 
 ```
 cargo install
