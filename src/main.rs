@@ -10,10 +10,10 @@ extern crate duct;
 extern crate clap;
 extern crate tera;
 
-use clap::{Arg, App};
+use clap::{App, Arg};
 
-extern crate tempdir;
 extern crate select;
+extern crate tempdir;
 
 use tempdir::TempDir;
 use tera::{Context, Tera};
@@ -49,18 +49,23 @@ fn generate_thumbnail(
     dimensions: &str,
     quality: &str,
 ) -> Result<String> {
-    let mut image_path = image.attr("data").ok_or(
-        "data attribute not found for image",
-    )?;
+    let mut image_path = image
+        .attr("data")
+        .ok_or("data attribute not found for image")?;
 
     // Awkward way to create a relative path
     if image_path.starts_with('/') {
         image_path = &image_path[1..];
     }
 
-    let dir = TempDir::new("tmp")?;
+    println!("Creating tempdir");
+
+    let dir = TempDir::new("")?;
     let thumb = dir.path().join("thumb.png");
 
+    println!("Temporary thumbnail location: {:?}", thumb);
+
+    println!("Running svgexport");
     cmd!(
         "svgexport",
         image_path,
@@ -70,6 +75,7 @@ fn generate_thumbnail(
         quality
     ).read()?;
 
+    println!("Running oxipng");
     cmd!(
         "oxipng",
         &thumb,
@@ -82,6 +88,7 @@ fn generate_thumbnail(
         "all"
     ).read()?;
 
+    println!("Running data-encoding");
     let base64 = cmd!(
         "data-encoding",
         "--mode=encode",
@@ -91,6 +98,7 @@ fn generate_thumbnail(
         &thumb
     ).read()?;
 
+    println!("Rendering HTML");
     let mut context = Context::new();
     context.add("object_html", &image.html());
     context.add("thumbnail_base64", &base64);

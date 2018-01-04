@@ -15,7 +15,10 @@ comments:
 ---
 
 <figure>
-  <object data="img/clothes.svg" type="image/svg+xml"></object>
+  <div class="loader">
+            <object data="img/clothes.svg" type="image/svg+xml"></object>
+            <img class="frozen" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAHCAMAAADgW+cVAAAA5FBMVEX////19fXi5ui9ys/U1NLMzMri39bm4trf2cva0b/c4+XZ4uXiw8LXtLTY3N7a3+LY6O0odZAlbYiVkomTioH1x1f6y1G3kEeYg0UondZlg6a6UFCSUlkqV3Fgh5zS5es3fZUdaYSqnpPBr4/3wkb7yUm9jTayl1NBos+uYma/U1R3SVQNSmk/b4g/fpUdZ4GYoaPmz5/1xVDxwEW/kDfcw5VQocOtYmjBWFiOSE9LV2p3mavr8fTU5Oj4+vv+9ub768PmyI3PqWPs3sXQr3P++fn57Oz46en//v77+fT28OT8+vUi22uyAAAAJklEQVR42mNAA4xogIUfP5+RQQ9VnoEPifePmRFirCcj4/9tIAYAQ14DroGzsXgAAAAASUVORK5CYII" />
+        </div>
   <figcaption>
   What do clothes have to do with Makefiles? Find out in this post.
   <a href="http://www.freepik.com/free-photos-vectors/background">Illustration by Anindyanfitri - Freepik.com</a>
